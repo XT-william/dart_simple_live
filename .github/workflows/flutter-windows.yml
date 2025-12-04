@@ -1,0 +1,39 @@
+name: Build Flutter Windows
+
+on:
+  workflow_dispatch:      # 允许你手动点按钮触发
+  push:
+    branches: [ master ]    # 如果你的默认分支叫 master，就改成 master
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          # 如果项目要求特定版本，可以加一行：
+          # flutter-version: '3.22.0'
+
+      - name: Enable Windows desktop
+        run: flutter config --enable-windows-desktop
+        working-directory: simple_live_app
+
+      - name: Flutter pub get
+        run: flutter pub get
+        working-directory: simple_live_app
+
+      - name: Build Windows (release)
+        run: flutter build windows --release
+        working-directory: simple_live_app
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows_release
+          path: simple_live_app/build/windows/x64/runner/Release
